@@ -1,0 +1,11 @@
+server:
+  error:
+    include-message: always
+  port: 9090
+
+internal:
+  book-service:
+    typeHttp: http
+    hostname: localhost
+    port: 8080
+    url: api/v2/books
