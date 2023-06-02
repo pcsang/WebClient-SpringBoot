@@ -9,13 +9,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 @Slf4j
@@ -48,7 +49,8 @@ public class BookRestClient {
         prefixUrl = config.getTypeHttp() + "://" + config.getHostname() + ":" + config.getPort() + "/" + config.getUrl();
     }
 
-    public Mono<ResponseEntity<Book>> getBookById(int id) {
+    @Async
+    public CompletableFuture<ResponseEntity<Book>> getBookById(int id) {
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put(Constant.AUTH_BASIC_USERNAME, "sang");
         headerMap.put(Constant.AUTH_BASIC_PAS, "sangpass");

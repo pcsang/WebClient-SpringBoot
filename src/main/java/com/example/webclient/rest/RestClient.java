@@ -16,11 +16,12 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
 public class RestClient {
-    public <T> Mono<ResponseEntity<T>> invoke(String url, Map<String, String> headerMap, HttpMethod httpMethod, Object body, Class<T> type, WebClient webClient) {
+    public <T> CompletableFuture<ResponseEntity<T>> invoke(String url, Map<String, String> headerMap, HttpMethod httpMethod, Object body, Class<T> type, WebClient webClient) {
         HttpHeaders httpHeaders = new HttpHeaders();
         String user = encodeBasicAuth(headerMap);
         httpHeaders.set(Constant.AUTHENTICATION_KEY_HEADERS, Constant.AUTH_BASIC + user);
@@ -28,7 +29,7 @@ public class RestClient {
         return this.makeRequest(url, httpHeaders, httpMethod, body, type, webClient);
     }
 
-    public <T> Mono<ResponseEntity<T>> makeRequest(String url, HttpHeaders headers, HttpMethod httpMethod, Object body, Class<T> type, WebClient webClient) {
+    public <T> CompletableFuture<ResponseEntity<T>> makeRequest(String url, HttpHeaders headers, HttpMethod httpMethod, Object body, Class<T> type, WebClient webClient) {
         long startTime = System.currentTimeMillis();
         WebClient.RequestBodySpec requestBodySpec = webClient.method(httpMethod).uri(URI.create(url));
         if (!ObjectUtils.isEmpty(headers)) {
@@ -42,11 +43,11 @@ public class RestClient {
             requestBodySpec.body(Mono.just(body), String.class);
         }
         log.info("{} starting", httpMethod.name());
-        Mono<ResponseEntity<T>> responseEntity = requestBodySpec.retrieve().onStatus(HttpStatus::isError, clientResponse -> {
+        CompletableFuture<ResponseEntity<T>> responseEntity = requestBodySpec.retrieve().onStatus(HttpStatus::isError, clientResponse -> {
             return clientResponse.bodyToMono(String.class).flatMap(requestBody -> {
                 return Mono.error(new ResponseStatusException(clientResponse.statusCode(), requestBody));
             });
-        }).toEntity(type);
+        }).toEntity(type).toFuture();
         log.info("{} finish", System.currentTimeMillis() - startTime);
 
         return responseEntity;

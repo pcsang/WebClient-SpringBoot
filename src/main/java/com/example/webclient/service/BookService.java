@@ -6,7 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @Slf4j
@@ -23,10 +25,11 @@ public class BookService {
         this.restClient = restClient;
     }
 
-    public Mono<ResponseEntity<Book>> getBookById(int id) {
-        Mono<ResponseEntity<Book>> response = restClient.getBookById(id);
-
-        return response;
+    public ResponseEntity<Book> getBookById(int id) throws ExecutionException, InterruptedException {
+        CompletableFuture<ResponseEntity<Book>> response = restClient.getBookById(id);
+        response.join();
+        ResponseEntity<Book> resBook = response.get();
+        return resBook;
     }
 
 

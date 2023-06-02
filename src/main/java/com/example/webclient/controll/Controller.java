@@ -3,14 +3,22 @@ package com.example.webclient.controll;
 import com.example.webclient.product.Book;
 import com.example.webclient.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/v2/client")
 public class Controller {
-//    private WebClient webClient;
+    private WebClient webClient;
     private final BookService bookService;
 
     @Autowired
@@ -18,24 +26,27 @@ public class Controller {
         this.bookService = bookService;
     }
 
-//    @PostConstruct
-//    public void init(){
-//        webClient = WebClient.builder()
-//                .baseUrl("http://localhost:8081/api/v1/books")
-//                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-//                .build();
-//    }
-//
-//    @GetMapping("/books")
-//    public Flux<Book> getBooks(){
-//        return webClient.get().uri("")
-//                .headers(HttpHeaders->HttpHeaders.setBasicAuth("sang", "sangpass"))
-//                .retrieve().bodyToFlux(Book.class);
-//    }
+    @PostConstruct
+    public void init(){
+        webClient = WebClient.builder()
+                .baseUrl("http://localhost:8081/api/v1/books")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
+    }
+
+    @GetMapping("/books")
+    public List<Book> getBooks(){
+        List<Book> list = new ArrayList<>();
+        Flux<Book> a = (Flux<Book>) webClient.get().uri("")
+                .headers(HttpHeaders->HttpHeaders.setBasicAuth("sang", "sangpass"))
+                .retrieve().bodyToFlux(Book.class).subscribe(p -> list.add(p));
+
+        return list;
+    }
 
 
     @GetMapping("/book/{id}")
-    public Mono<ResponseEntity<Book>> getBookById(@PathVariable int id){
+    public ResponseEntity<Book> getBookById(@PathVariable int id) throws ExecutionException, InterruptedException {
         return bookService.getBookById(id);
     }
 
