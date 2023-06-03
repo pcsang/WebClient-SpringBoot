@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,12 +49,12 @@ public class RestClient {
                 return Mono.error(new ResponseStatusException(clientResponse.statusCode(), requestBody));
             });
         }).toEntity(type).toFuture();
-        log.info("{} finish", System.currentTimeMillis() - startTime);
+        log.info("Request finish - Time = {}", System.currentTimeMillis() - startTime);
 
         return responseEntity;
     }
 
-    public <T> ResponseEntity<List<T>> invokeList(String url, Map<String, String> headerMap, HttpMethod httpMethod, Object body, Class<T> type, WebClient webClient) {
+    public <T> CompletableFuture<ResponseEntity<List<T>>> invokeList(String url, Map<String, String> headerMap, HttpMethod httpMethod, Object body, Class<T> type, WebClient webClient) {
         HttpHeaders httpHeaders = new HttpHeaders();
         String user = encodeBasicAuth(headerMap);
         httpHeaders.set(Constant.AUTHENTICATION_KEY_HEADERS, Constant.AUTH_BASIC + user);
@@ -61,12 +62,12 @@ public class RestClient {
         return this.makeRequestList(url, httpHeaders, httpMethod, body, type, webClient);
     }
 
-    public <T> ResponseEntity<List<T>> makeRequestList(String url, HttpHeaders headers, HttpMethod httpMethod, Object body, Class<T> type, WebClient webClient) {
+    public <T> CompletableFuture<ResponseEntity<List<T>>> makeRequestList(String url, HttpHeaders headers, HttpMethod httpMethod, Object body, Class<T> type, WebClient webClient) {
         long startTime = System.currentTimeMillis();
         WebClient.RequestBodySpec requestBodySpec = webClient.method(httpMethod).uri(URI.create(url));
         if (!ObjectUtils.isEmpty(headers)) {
             requestBodySpec.headers(headersCustom -> {
-                headersCustom.setBasicAuth("anc", "anc");
+                headersCustom.addAll(headers);
             });
         }
 
@@ -75,10 +76,10 @@ public class RestClient {
             requestBodySpec.body(Mono.just(body), String.class);
         }
         log.info("{} starting", httpMethod.name());
-        ResponseEntity<List<T>> responseEntity = requestBodySpec.retrieve().onStatus(HttpStatus::isError, clientResponse -> {
+        CompletableFuture<ResponseEntity<List<T>>> responseEntity = requestBodySpec.retrieve().onStatus(HttpStatus::isError, clientResponse -> {
             return clientResponse.bodyToMono(String.class).flatMap(requestBody -> Mono.error(new ResponseStatusException(clientResponse.statusCode(), requestBody)));
-        }).toEntityList(type).block();
-        log.info("{} finish", System.currentTimeMillis() - startTime);
+        }).toEntityList(type).toFuture();
+        log.info("Request finish - Time = {}", System.currentTimeMillis() - startTime);
 
         return responseEntity;
     }

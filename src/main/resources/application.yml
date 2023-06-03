@@ -9,3 +9,6 @@ internal:
     hostname: localhost
     port: 8080
     url: api/v2/books
+  credential:
+    userInfo: sang
+    password: sangpass
