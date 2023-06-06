@@ -86,26 +86,23 @@ public class BookRestClient {
 
     @Async
     public CompletableFuture<ResponseEntity<List<Book>>> getBookByFilters(String author, String category) {
-        String params = "";
+        Map<String, String> params = new HashMap<>();
         if (!ObjectUtils.isEmpty(author)) {
-            params += "author=" + author;
+            params.put("author", author);
         }
+
         if (!ObjectUtils.isEmpty(category)) {
-            if (!ObjectUtils.isEmpty(params)) {
-                params += "&";
-            }
-            params += "category=" + category;
+            params.put("category", category);
         }
+
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put(Constant.AUTH_BASIC_USERNAME, userInfo);
         headerMap.put(Constant.AUTH_BASIC_PAS, passInfo);
         String url = prefixUrl + "/by";
-        if (!ObjectUtils.isEmpty(params)) {
-            url += "?" + params;
-        }
+
         log.info("GET Url: {}", url);
 
-        return restClient.invokeList(url, headerMap, HttpMethod.GET, "", Book.class, webClient);
+        return restClient.invokeList(url, headerMap, HttpMethod.GET, params, "", Book.class, webClient);
     }
 
     public CompletableFuture<ResponseEntity<Book>> postBook(Book book) throws JsonProcessingException {
