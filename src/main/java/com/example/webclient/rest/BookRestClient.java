@@ -40,9 +40,10 @@ public class BookRestClient {
 
     /**
      * Constructor for BookService
-     *   @param restClient rest client
-     * @param config      config is used to store info
-     * @param webClient   web client use for Book
+     *
+     * @param restClient        rest client
+     * @param config            config is used to store info
+     * @param webClient         web client use for Book
      * @param userDetailsConfig userDetailsConfig
      */
     @Autowired

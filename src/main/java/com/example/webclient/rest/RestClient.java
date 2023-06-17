@@ -53,7 +53,7 @@ public class RestClient {
         log.info("{} starting", httpMethod.name());
         CompletableFuture<ResponseEntity<T>> responseEntity = requestBodySpec.retrieve()
                 .onStatus(HttpStatus::isError, clientResponse -> clientResponse.bodyToMono(String.class)
-                        .flatMap(requestBody -> Mono.error(new ResponseStatusException(clientResponse.statusCode(), requestBody))))
+                        .flatMap(requestBody -> Mono.error(new RuntimeException(requestBody.toLowerCase()))))
                 .toEntity(type).toFuture();
         log.info("Request finish - Time = {}", System.currentTimeMillis() - startTime);
 

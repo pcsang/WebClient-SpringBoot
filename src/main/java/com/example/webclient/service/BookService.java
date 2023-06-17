@@ -73,13 +73,13 @@ public class BookService {
         return response.getBody();
     }
 
-    public String deleteById(String id) throws ExecutionException, InterruptedException {
+    public ResponseEntity<String> deleteById(String id) throws ExecutionException, InterruptedException {
         ResponseEntity<String> response = restClient.deleteById(id).get();
         if (!response.getStatusCode().is2xxSuccessful()) {
             log.warn("Response invalid - StatusCode = {}, Body = null", response.getStatusCode());
-            return "Can not delete Book with id=" + id;
+            return ResponseEntity.badRequest().body("Can not delete Book with id=" + id);
         }
-        return "Delete Book successfully!";
+        return response;
     }
 
     public Book updateBook(String id, @NonNull Book book) throws JsonProcessingException, ExecutionException, InterruptedException {

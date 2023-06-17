@@ -5,6 +5,7 @@ import com.example.webclient.service.BookService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -12,11 +13,11 @@ import java.util.concurrent.ExecutionException;
 @RestController
 @Slf4j
 @RequestMapping("/api/v2/client")
-public class Controller {
+public class BookController {
     private final BookService bookService;
 
     @Autowired
-    public Controller(BookService bookService) {
+    public BookController(BookService bookService) {
         this.bookService = bookService;
     }
 
@@ -42,7 +43,7 @@ public class Controller {
     }
 
     @DeleteMapping(path = "book/delete/{id}")
-    public String deleteBook(@PathVariable int id) throws ExecutionException, InterruptedException {
+    public ResponseEntity<String> deleteBook(@PathVariable int id) throws ExecutionException, InterruptedException {
         log.info("delete /book/{}", id);
         return bookService.deleteById(String.valueOf(id));
     }
