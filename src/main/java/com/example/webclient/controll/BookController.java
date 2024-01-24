@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+@CrossOrigin(origins = "*")
 @RestController
 @Slf4j
 @RequestMapping("/api/v2/client")
@@ -62,10 +63,10 @@ public class BookController {
     }
 
     @GetMapping("/abc")
-    public Mono<String> getBooks(){
+    public Mono<String> getBooks(@RequestParam String trackingNumber){
 
         return webClient.get().uri("https://spx.vn/api/v2/fleet_order/tracking/search?sls_tracking_number="
-                        + TrackingNumberGenerator.trackingNumberFunc("SPXVN048106749441"))
+                        + TrackingNumberGenerator.trackingNumberFunc(trackingNumber))
                 .retrieve().bodyToMono(String.class);
     }
 }

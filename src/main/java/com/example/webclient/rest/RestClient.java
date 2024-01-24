@@ -4,7 +4,7 @@ import com.example.webclient.common.Constant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -52,7 +52,7 @@ public class RestClient {
         }
         log.info("{} starting", httpMethod.name());
         CompletableFuture<ResponseEntity<T>> responseEntity = requestBodySpec.retrieve()
-                .onStatus(HttpStatus::isError, clientResponse -> clientResponse.bodyToMono(String.class)
+                .onStatus(HttpStatusCode::isError, clientResponse -> clientResponse.bodyToMono(String.class)
                         .flatMap(requestBody -> Mono.error(new RuntimeException(requestBody.toLowerCase()))))
                 .toEntity(type).toFuture();
         log.info("Request finish - Time = {}", System.currentTimeMillis() - startTime);
@@ -91,7 +91,7 @@ public class RestClient {
         }
         log.info("{} starting", httpMethod.name());
         CompletableFuture<ResponseEntity<List<T>>> responseEntity = requestBodySpec.retrieve()
-                .onStatus(HttpStatus::isError, clientResponse -> clientResponse.bodyToMono(String.class)
+                .onStatus(HttpStatusCode::isError, clientResponse -> clientResponse.bodyToMono(String.class)
                         .flatMap(requestBody -> Mono.error(new ResponseStatusException(clientResponse.statusCode(), requestBody))))
                 .toEntityList(type).toFuture();
         log.info("Request finish - Time = {}", System.currentTimeMillis() - startTime);
